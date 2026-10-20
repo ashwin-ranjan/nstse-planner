@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>NSTSE Class 7 — Study Dashboard</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1220;
+      --panel: #111c2e;
+      --panel-raised: #16243a;
+      --text: #f1f5fc;
+      --muted: #9eacc2;
+      --line: #293950;
+      --blue: #91baff;
+      --green: #69e0b0;
+      --yellow: #ffd782;
+      --pink: #f2addb;
+      --purple: #c7b4ff;
+      --danger: #ffb6c3;
+      --radius: 18px;
+      --shadow: 0 16px 40px rgb(0 0 0 / 12%);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 15% 0%, rgb(39 73 124 / 25%), transparent 38rem),
+        var(--bg);
+      color: var(--text);
+      font: 15px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 3px;
+    }
+    .app { width: min(1120px, 100% - 32px); margin: 0 auto; padding: 34px 0 48px; }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 8px 0 24px;
+    }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin: 8px 0 12px; font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.05; letter-spacing: -.045em; }
+    h1 span { color: var(--blue); }
+    h2 { margin-bottom: 4px; font-size: 1.45rem; letter-spacing: -.025em; }
+    h3 { margin-bottom: 8px; font-size: 1.05rem; }
+    .subtitle { max-width: 650px; margin-bottom: 0; color: var(--muted); }
+    .offline-label, .chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 7px 11px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 8px 0 22px; }
+    .stat, .panel, .subject-card, .day-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgb(22 36 58 / 94%), rgb(15 25 42 / 96%));
+      box-shadow: var(--shadow);
+    }
+    .stat { padding: 17px; min-width: 0; }
+    .stat-label { display: block; color: var(--muted); font-size: 11px; font-weight: 750; letter-spacing: .09em; text-transform: uppercase; }
+    .stat-value { display: block; margin-top: 3px; font-size: 1.8rem; font-weight: 800; letter-spacing: -.04em; }
+    .progress-track { height: 6px; overflow: hidden; margin-top: 12px; border-radius: 999px; background: #26364d; }
+    .progress-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width .2s ease; }
+    .tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 1px 15px; scrollbar-width: thin; }
+    .tab { flex: 0 0 auto; padding: 10px 14px; border: 1px solid var(--line); border-radius: 12px; background: transparent; color: var(--muted); transition: background .15s, color .15s; }
+    .tab:hover { color: var(--text); background: var(--panel); }
+    .tab.active { border-color: var(--blue); background: var(--blue); color: #0a1424; font-weight: 800; }
+    .section { display: none; }
+    .section.active { display: block; animation: appear .18s ease-out; }
+    @keyframes appear { from { opacity: .6; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+    .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin: 8px 0 17px; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .week-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-bottom: 14px; }
+    .week-button { padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: var(--panel); color: var(--text); text-align: left; }
+    .week-button strong, .week-button small { display: block; }
+    .week-button small { margin-top: 2px; color: var(--muted); }
+    .week-button.active { border-color: var(--blue); background: #1a2e49; }
+    .day-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .day-card { padding: 16px; box-shadow: none; }
+    .day-card.done { border-color: #347b67; background: linear-gradient(145deg, #12342f, #102720); }
+    .day-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .day-label { display: flex; align-items: center; gap: 9px; font-weight: 800; font-size: 17px; }
+    input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--green); flex: 0 0 auto; }
+    .tag { display: inline-block; border-radius: 7px; padding: 3px 7px; background: #263750; color: #cbdaf1; font-size: 10px; font-weight: 800; letter-spacing: .04em; }
+    .task { margin-top: 10px; padding: 10px 12px; border: 1px solid rgb(41 57 80 / 65%); border-radius: 11px; background: rgb(8 16 29 / 38%); overflow-wrap: anywhere; }
+    .task-label { display: block; margin-bottom: 2px; color: var(--blue); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .day-note { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; }
+    .subject-grid, .two-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .subject-card { padding: 17px; box-shadow: none; }
+    .subject-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .subject-title h3 { margin: 0; }
+    .topic-row { display: flex; align-items: flex-start; gap: 9px; padding: 9px 0; border-bottom: 1px solid rgb(41 57 80 / 70%); }
+    .topic-row:last-child { border-bottom: 0; }
+    .topic-row input { margin-top: 4px; }
+    .topic-name { flex: 1; }
+    .priority { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; font-size: 10px; font-weight: 850; }
+    .priority-a { background: #173d35; color: #8ce9c5; }
+    .priority-b { background: #40351e; color: #ffdf96; }
+    .priority-c { background: #322748; color: #e0c6ff; }
+    .panel { padding: 18px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+    .field { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { color: var(--muted); font-size: 12px; font-weight: 650; }
+    .field input, .field textarea, .field select {
+      width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+      background: #0b1525; color: var(--text);
+    }
+    .field textarea { min-height: 88px; resize: vertical; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+    .button { border: 1px solid transparent; border-radius: 10px; padding: 10px 14px; background: var(--blue); color: #091426; font-weight: 800; transition: filter .15s, transform .15s; }
+    .button:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .button.secondary { border-color: var(--line); background: #23334b; color: var(--text); }
+    .button.danger { border-color: #633445; background: #452536; color: var(--danger); }
+    .log-item { padding: 13px 0; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+    .log-item:first-child { border-top: 0; }
+    .log-item strong { display: block; }
+    .log-item p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+    .empty { padding: 22px; border: 1px dashed var(--line); border-radius: 12px; color: var(--muted); text-align: center; }
+    .timer-display { margin: 12px 0; font-size: clamp(2.5rem, 7vw, 3.4rem); font-weight: 850; line-height: 1.1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+    .timer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .timer-task { margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #0e192a; }
+    .timer-task.current { border-color: var(--blue); }
+    .notice { margin-top: 18px; padding: 13px 15px; border: 1px solid #6b552b; border-radius: 12px; background: #282318; color: #ffe5a3; font-size: 13px; }
+    footer { margin-top: 23px; color: var(--muted); text-align: center; font-size: 12px; }
+    @media (max-width: 760px) {
+      .app { width: min(100% - 24px, 600px); padding-top: 23px; }
+      .hero { flex-direction: column; gap: 13px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .day-grid, .subject-grid, .two-column, .form-grid { grid-template-columns: 1fr; }
+      .week-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .field.full { grid-column: auto; }
+      .section-heading { align-items: flex-start; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Class 7 · NSTSE preparation</div>
+        <h1>Study like you mean it. <span>✦</span></h1>
+        <p class="subtitle">A focused 28-day game plan: two hours a day, complete syllabus tracking, mistake reviews, and mock-test prep.</p>
+      </div>
+      <div class="offline-label">✦ Offline-friendly · saved in this browser</div>
+    </header>
+
+    <section class="stats" aria-label="Study progress">
+      <article class="stat">
+        <span class="stat-label">Plan completed</span>
+        <strong class="stat-value" id="percent">0%</strong>
+        <div class="progress-track"><div class="progress-fill" id="progressbar"></div></div>
+      </article>
+      <article class="stat"><span class="stat-label">Days finished</span><strong class="stat-value" id="daysdone">0 / 28</strong></article>
+      <article class="stat"><span class="stat-label">Mock tests logged</span><strong class="stat-value" id="mockcount">0</strong></article>
+      <article class="stat"><span class="stat-label">Daily target</span><strong class="stat-value">2 hrs</strong></article>
+    </section>
+
+    <nav class="tabs" aria-label="Dashboard sections">
+      <button class="tab active" data-tab="plan">▦ 28-Day Plan</button>
+      <button class="tab" data-tab="syllabus">▤ Syllabus</button>
+      <button class="tab" data-tab="timer">◷ Study Timer</button>
+      <button class="tab" data-tab="mistakes">✎ Mistake Log</button>
+      <button class="tab" data-tab="mock">⚑ Mock Scores</button>
+    </nav>
+
+    <section class="section active" id="plan">
+      <div class="section-heading">
+        <div><h2>Your daily missions</h2><div class="muted">Mark a day complete after finishing both subjects and reviewing mistakes.</div></div>
+        <button class="button secondary" id="resetPlan">Reset day checkboxes</button>
+      </div>
+      <div class="week-grid" id="weeks"></div>
+      <div class="day-grid" id="days"></div>
+    </section>
+
+    <section class="section" id="syllabus">
+      <div class="section-heading">
+        <div><h2>Full syllabus checklist</h2><div class="muted">Track every topic. A/B/C are study priorities, not official NSTSE weightings.</div></div>
+        <div class="chip" id="topicCount">0 topics done</div>
+      </div>
+      <div class="subject-grid" id="subjects"></div>
+    </section>
+
+    <section class="section" id="timer">
+      <div class="section-heading"><div><h2>Two-hour study timer</h2><div class="muted">Choose a block, then start the countdown.</div></div></div>
+      <div class="two-column">
+        <article class="panel">
+          <div class="eyebrow">Current session</div>
+          <h2 id="timername">Learn concepts</h2>
+          <div class="timer-display" id="clock">25:00</div>
+          <div class="progress-track"><div class="progress-fill" id="timerbar"></div></div>
+          <p class="muted" id="timerdesc">Read the topic and understand worked examples.</p>
+          <div class="timer-buttons">
+            <button class="button" id="startTimer">Start</button>
+            <button class="button secondary" id="pauseTimer">Pause</button>
+            <button class="button secondary" id="restartTimer">Restart</button>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Today's 120 minutes</h3>
+          <div id="blocks"></div>
+          <p class="muted small">On mock-test days, use the paper's stated time limit, then review wrong and guessed answers.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="mistakes">
+      <div class="section-heading"><div><h2>Mistake log</h2><div class="muted">Record what went wrong and what to remember next time.</div></div></div>
+      <form class="panel" id="mistakeForm">
+        <div class="form-grid">
+          <div class="field"><label for="mSubject">Subject</label><select id="mSubject"><option>Mathematics</option><option>Physics</option><option>Chemistry</option><option>Biology</option><option>Critical Thinking</option></select></div>
+          <div class="field"><label for="mTopic">Topic</label><input id="mTopic" required placeholder="e.g. Fractions and decimals"></div>
+          <div class="field"><label for="mType">Mistake type</label><select id="mType"><option>Concept gap</option><option>Calculation / careless error</option><option>Misread question</option><option>Time pressure</option><option>Guessed incorrectly</option></select></div>
+          <div class="field"><label for="mDate">Review date</label><input id="mDate" type="date"></div>
+          <div class="field full"><label for="mNotes">What went wrong / correct rule</label><textarea id="mNotes" placeholder="Write why you missed it and the correct approach."></textarea></div>
+        </div>
+        <div class="button-row"><button class="button" type="submit">Save mistake</button></div>
+      </form>
+      <article class="panel" style="margin-top:14px"><h3>Saved mistakes</h3><div id="mistakeList" class="empty">No mistakes logged yet. Add one after your first practice set.</div></article>
+    </section>
+
+    <section class="section" id="mock">
+      <div class="section-heading"><div><h2>Mock-test tracker</h2><div class="muted">Track scores and let each test decide what you revise next.</div></div></div>
+      <form class="panel" id="mockForm">
+        <div class="form-grid">
+          <div class="field"><label for="tName">Test name</label><input id="tName" required placeholder="e.g. Official model paper 1"></div>
+          <div class="field"><label for="tDate">Date</label><input id="tDate" type="date"></div>
+          <div class="field"><label for="tScore">Score</label><input id="tScore" required type="number" min="0" step="any" placeholder="e.g. 42"></div>
+          <div class="field"><label for="tMax">Maximum marks</label><input id="tMax" required type="number" min="1" step="any" placeholder="e.g. 60"></div>
+          <div class="field"><label for="tTime">Time taken (minutes)</label><input id="tTime" type="number" min="0" placeholder="e.g. 58"></div>
+          <div class="field"><label for="tWeak">Top weak area</label><input id="tWeak" placeholder="e.g. Light and geometry"></div>
+          <div class="field full"><label for="tNotes">Review notes</label><textarea id="tNotes" placeholder="What should you revise before the next test?"></textarea></div>
+        </div>
+        <div class="button-row"><button class="button" type="submit">Save mock score</button></div>
+      </form>
+      <article class="panel" style="margin-top:14px"><h3>Test history</h3><div id="mockList" class="empty">No mock tests logged yet.</div></article>
+    </section>
+
+    <aside class="notice">📌 Exam date unknown: this is a flexible 28-day plan. If your exam is sooner, make a quick pass through every topic, then focus on weak areas and timed papers. Confirm the exact format and marking scheme for your exam edition.</aside>
+    <footer>Progress is stored locally in this browser. Clearing browser site data may erase it; this dashboard does not sync across devices.</footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const plan = [
+      ["Integers; Fractions and Decimals", "Motion and Time"],
+      ["Rational Numbers; Data Handling", "Heat"],
+      ["Simple Equations; Algebraic Expressions", "Nutrition in Plants"],
+      ["Lines and Angles; Triangle Properties", "Electric Current and its Effects"],
+      ["Comparing Quantities", "Acids, Bases and Salts"],
+      ["Perimeter and Area; Exponents and Powers", "Nutrition in Animals"],
+      ["Revision of Days 1–6; mini-test", "Review mistakes"],
+      ["Congruence of Triangles; Practical Geometry", "Light"],
+      ["Symmetry; Visualising Solid Shapes", "Physical and Chemical Changes"],
+      ["Fractions, Percentages and Equations — advanced MCQs", "Respiration in Organisms"],
+      ["Triangle Problems; Geometry Reasoning", "Transportation in Living Beings"],
+      ["Perimeter, Area and Data Handling", "Organization in Living Beings"],
+      ["Algebra and Exponents — mixed practice", "Soil; Water and Its Conservation"],
+      ["Timed Mixed Mock + Analysis", "Repair weak concepts"],
+      ["Integers, Rational Numbers and Decimals — speed practice", "Fibre to Fabric"],
+      ["Comparing Quantities; Data Handling", "Changes and Adaptation"],
+      ["Practical Geometry; Congruence; Symmetry", "Reproduction and Growth in Plants"],
+      ["Mixed Geometry HOTS", "Winds, Storms and Cyclones"],
+      ["Algebra and Arithmetic HOTS", "Forests as a Resource on Earth"],
+      ["Visualising Solid Shapes; Exponents", "Revise all Physics"],
+      ["Full-Syllabus Science MCQs", "Critical Thinking practice"],
+      ["Full Maths Revision + Difficult Questions", "Review error log"],
+      ["Full Physics and Chemistry Revision", "Science MCQs"],
+      ["Full Biology Revision", "Critical Thinking Sets"],
+      ["Full Mock Test #1", "Analyse every mistake"],
+      ["Weakest 3 Topics — targeted repair", "Mixed HOTS"],
+      ["Full Mock Test #2", "Analyse every mistake"],
+      ["Formula Sheet; Diagrams; Facts", "Light revision and confidence"]
+    ];
+
+    const weeks = [
+      ["Week 1", "Foundations"],
+      ["Week 2", "Core syllabus"],
+      ["Week 3", "Finish coverage"],
+      ["Week 4", "Exam readiness"]
+    ];
+
+    const subjects = {
+      Mathematics: {
+        color: "#91baff",
+        topics: [
+          ["Integers", "A"], ["Fractions and Decimals", "A"], ["Data Handling", "B"],
+          ["Simple Equations", "A"], ["Lines and Angles", "A"], ["Triangle and its Properties", "A"],
+          ["Congruence of Triangles", "B"], ["Comparing Quantities", "A"], ["Rational Numbers", "B"],
+          ["Practical Geometry", "B"], ["Perimeter and Area", "A"], ["Algebraic Expressions", "A"],
+          ["Exponents and Powers", "B"], ["Symmetry", "C"], ["Visualising Solid Shapes", "C"]
+        ]
+      },
+      Physics: {
+        color: "#ffd782",
+        topics: [["Motion and Time", "A"], ["Heat", "A"], ["Light", "B"], ["Electric Current and its Effects", "A"]]
+      },
+      Chemistry: {
+        color: "#f2addb",
+        topics: [["Physical and Chemical Changes", "B"], ["Acids, Bases and Salts", "A"], ["Winds, Storms and Cyclones", "C"], ["Water and Its Conservation", "C"]]
+      },
+      Biology: {
+        color: "#69e0b0",
+        topics: [
+          ["Nutrition in Plants", "A"], ["Nutrition in Animals", "A"], ["Fibre to Fabric", "C"],
+          ["Organization in Living Beings", "B"], ["Soil", "B"], ["Respiration in Organisms", "A"],
+          ["Changes and Adaptation", "B"], ["Transportation in Living Beings", "A"],
+          ["Reproduction and Growth in Plants", "B"], ["Resource on Earth — Forests", "C"]
+        ]
+      },
+      "Critical Thinking": {
+        color: "#c7b4ff",
+        topics: [["Logical and Inductive Reasoning", "A"], ["Real-life application of concepts", "A"], ["HOTS and decision-making", "A"]]
+      }
+    };
+
+    const routine = [
+      { name: "Learn concepts", minutes: 25, description: "Read the topic and understand worked examples." },
+      { name: "Solve questions", minutes: 40, description: "Start easy, then practise MCQs and multi-step HOTS." },
+      { name: "Second subject", minutes: 25, description: "Learn a different subject to keep coverage balanced." },
+      { name: "Reasoning + error log", minutes: 20, description: "Practise reasoning, review mistakes, and revise formulas." }
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const STORAGE_KEY = "nstseDashboardV1";
+    const defaultData = { done: {}, topics: {}, mistakes: [], mocks: [] };
+    let data = loadData();
+
+    function loadData() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return {
+          ...defaultData,
+          ...saved,
+          done: saved.done || {},
+          topics: saved.topics || {},
+          mistakes: Array.isArray(saved.mistakes) ? saved.mistakes : [],
+          mocks: Array.isArray(saved.mocks) ? saved.mocks : []
+        };
+      } catch {
+        return { ...defaultData };
+      }
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch {
+        // The dashboard still works for this session if browser storage is blocked.
+      }
+      updateStats();
+    }
+
+    function updateStats() {
+      const daysDone = Object.values(data.done).filter(Boolean).length;
+      const totalTopics = Object.values(subjects).reduce((sum, subject) => sum + subject.topics.length, 0);
+      const topicsDone = Object.values(data.topics).filter(Boolean).length;
+      $("percent").textContent = `${Math.round((daysDone / plan.length) * 100)}%`;
+      $("daysdone").textContent = `${daysDone} / ${plan.length}`;
+      $("progressbar").style.width = `${(daysDone / plan.length) * 100}%`;
+      $("mockcount").textContent = data.mocks.length;
+      $("topicCount").textContent = `${topicsDone} / ${totalTopics} topics done`;
+    }
+
+    function renderWeeks() {
+      $("weeks").innerHTML = weeks.map(([title, description], index) => `
+        <button class="week-button ${index === selectedWeek ? "active" : ""}" data-week="${index}" aria-pressed="${index === selectedWeek}">
+          <strong>${title}</strong><small>${description}</small>
+        </button>
+      `).join("");
+    }
+
+    let selectedWeek = 0;
+
+    function dayNote(day) {
+      const notes = {
+        7: "Review errors and make a weak-topic list.",
+        14: "Take a timed mixed test and check every guessed answer.",
+        21: "Check full-syllabus coverage before starting final revision.",
+        25: "Use a reliable paper and follow its stated timing and marking.",
+        27: "Compare with your previous mock and target remaining weak areas."
+      };
+      return notes[day] || "Finish with a short reasoning set and mistake review.";
+    }
+
+    function renderDays() {
+      const start = selectedWeek * 7;
+      $("days").innerHTML = plan.slice(start, start + 7).map(([main, second], index) => {
+        const day = start + index + 1;
+        const isDone = Boolean(data.done[day]);
+        const isTestDay = [7, 14, 21, 25, 27].includes(day);
+        return `
+          <article class="day-card ${isDone ? "done" : ""}">
+            <div class="day-header">
+              <label class="day-label"><input type="checkbox" data-day="${day}" ${isDone ? "checked" : ""}> Day ${day}</label>
+              <span class="tag">${isTestDay ? "TEST / REVIEW" : "2 HOURS"}</span>
+            </div>
+            <div class="task"><span class="task-label">Main focus</span>${main}</div>
+            <div class="task"><span class="task-label">Second focus</span>${second}</div>
+            <small class="day-note">${dayNote(day)}</small>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderSubjects() {
+      $("subjects").innerHTML = Object.entries(subjects).map(([name, subject]) => {
+        const topics = subject.topics.map(([topic, priority]) => {
+          const key = `${name}|${topic}`;
+          const checked = Boolean(data.topics[key]);
+          return `
+            <label class="topic-row">
+              <input type="checkbox" data-topic="${escapeAttribute(key)}" ${checked ? "checked" : ""}>
+              <span class="topic-name">${topic}<span class="priority priority-${priority.toLowerCase()}">${priority}</span></span>
+            </label>
+          `;
+        }).join("");
+        return `
+          <article class="subject-card">
+            <div class="subject-title"><h3 style="color:${subject.color}">${name}</h3><span class="chip">${subject.topics.length} topics</span></div>
+            <div>${topics}</div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      })[character]);
+    }
+
+    function escapeAttribute(value) {
+      return escapeHTML(value);
+    }
+
+    function renderMistakes() {
+      const list = $("mistakeList");
+      if (!data.mistakes.length) {
+        list.className = "empty";
+        list.textContent = "No mistakes logged yet. Add one after your first practice set.";
+        return;
+      }
+      list.className = "";
+      list.innerHTML = [...data.mistakes].reverse().map((mistake, reverseIndex) => {
+        const index = data.mistakes.length - 1 - reverseIndex;
+        return `
+          <div class="log-item">
+            <strong>${escapeHTML(mistake.topic)} <span class="tag">${escapeHTML(mistake.subject)}</span></strong>
+            <p>${escapeHTML(mistake.type)} · Review: ${escapeHTML(mistake.date || "not set")}</p>
+            <p>${escapeHTML(mistake.notes || "No notes added.")}</p>
+            <div class="button-row"><button class="button danger" data-delete-mistake="${index}" type="button">Delete</button></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderMocks() {
+      const list = $("mockList");
+      if (!data.mocks.length) {
+        list.className = "empty";
+        list.textContent = "No mock tests logged yet.";
+        return;
+      }
+      list.className = "";
+      list.innerHTML = [...data.mocks].reverse().map((mock, reverseIndex) => {
+        const index = data.mocks.length - 1 - reverseIndex;
+        const score = Number(mock.score);
+        const maximum = Number(mock.max);
+        const percentage = maximum > 0 ? Math.round((score / maximum) * 100) : 0;
+        return `
+          <div class="log-item">
+            <strong>${escapeHTML(mock.name)} — ${score}/${maximum} (${percentage}%)</strong>
+            <p>${escapeHTML(mock.date || "Date not set")} · ${mock.time ? `${escapeHTML(mock.time)} min` : "Time not recorded"} · Weak area: ${escapeHTML(mock.weak || "not entered")}</p>
+            <p>${escapeHTML(mock.notes || "No review notes.")}</p>
+            <div class="button-row"><button class="button danger" data-delete-mock="${index}" type="button">Delete</button></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll("[data-tab]").forEach((button) => {
+        const active = button.dataset.tab === sectionId;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      document.querySelectorAll(".section").forEach((section) => {
+        section.classList.toggle("active", section.id === sectionId);
+      });
+    }
+
+    let currentBlock = 0;
+    let secondsLeft = routine[0].minutes * 60;
+    let timerInterval = null;
+
+    function renderTimer() {
+      const block = routine[currentBlock];
+      const minutes = Math.floor(secondsLeft / 60);
+      const seconds = secondsLeft % 60;
+      $("timername").textContent = block.name;
+      $("clock").textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      $("timerdesc").textContent = block.description;
+      const elapsed = 1 - secondsLeft / (block.minutes * 60);
+      $("timerbar").style.width = `${Math.max(0, Math.min(100, elapsed * 100))}%`;
+      $("blocks").innerHTML = routine.map((item, index) => `
+        <div class="timer-task ${index === currentBlock ? "current" : ""}">
+          <span class="task-label">${item.minutes} minutes${index === currentBlock ? " · current" : ""}</span>
+          <strong>${item.name}</strong>
+          <div class="muted small">${item.description}</div>
+          <div class="button-row"><button class="button secondary" data-timer-block="${index}" type="button">Select block</button></div>
+        </div>
+      `).join("");
+    }
+
+    function stopTimer() {
+      window.clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function selectTimerBlock(index) {
+      stopTimer();
+      currentBlock = index;
+      secondsLeft = routine[index].minutes * 60;
+      renderTimer();
+    }
+
+    document.addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-tab]");
+      if (tab) showSection(tab.dataset.tab);
+
+      const weekButton = event.target.closest("[data-week]");
+      if (weekButton) {
+        selectedWeek = Number(weekButton.dataset.week);
+        renderWeeks();
+        renderDays();
+      }
+
+      const timerButton = event.target.closest("[data-timer-block]");
+      if (timerButton) selectTimerBlock(Number(timerButton.dataset.timerBlock));
+
+      const deleteMistakeButton = event.target.closest("[data-delete-mistake]");
+      if (deleteMistakeButton) {
+        data.mistakes.splice(Number(deleteMistakeButton.dataset.deleteMistake), 1);
+        saveData();
+        renderMistakes();
+      }
+
+      const deleteMockButton = event.target.closest("[data-delete-mock]");
+      if (deleteMockButton) {
+        data.mocks.splice(Number(deleteMockButton.dataset.deleteMock), 1);
+        saveData();
+        renderMocks();
+      }
+    });
+
+    document.addEventListener("change", (event) => {
+      const dayCheckbox = event.target.closest("[data-day]");
+      if (dayCheckbox) {
+        data.done[dayCheckbox.dataset.day] = dayCheckbox.checked;
+        saveData();
+        renderDays();
+      }
+
+      const topicCheckbox = event.target.closest("[data-topic]");
+      if (topicCheckbox) {
+        data.topics[topicCheckbox.dataset.topic] = topicCheckbox.checked;
+        saveData();
+        renderSubjects();
+      }
+    });
+
+    $("resetPlan").addEventListener("click", () => {
+      const confirmed = window.confirm("Reset all 28 day checkboxes? Your topic checklist, mistakes, and mock scores will stay.");
+      if (!confirmed) return;
+      data.done = {};
+      saveData();
+      renderDays();
+    });
+
+    $("mistakeForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      data.mistakes.push({
+        subject: $("mSubject").value,
+        topic: $("mTopic").value.trim(),
+        type: $("mType").value,
+        date: $("mDate").value,
+        notes: $("mNotes").value.trim()
+      });
+      saveData();
+      renderMistakes();
+      event.target.reset();
+    });
+
+    $("mockForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const score = Number($("tScore").value);
+      const maximum = Number($("tMax").value);
+      if (score > maximum) {
+        $("tScore").setCustomValidity("Score cannot be greater than maximum marks.");
+        $("tScore").reportValidity();
+        $("tScore").setCustomValidity("");
+        return;
+      }
+      data.mocks.push({
+        name: $("tName").value.trim(),
+        date: $("tDate").value,
+        score,
+        max: maximum,
+        time: $("tTime").value,
+        weak: $("tWeak").value.trim(),
+        notes: $("tNotes").value.trim()
+      });
+      saveData();
+      renderMocks();
+      event.target.reset();
+    });
+
+    $("startTimer").addEventListener("click", () => {
+      if (timerInterval || secondsLeft <= 0) return;
+      timerInterval = window.setInterval(() => {
+        secondsLeft = Math.max(0, secondsLeft - 1);
+        renderTimer();
+        if (secondsLeft === 0) {
+          stopTimer();
+          window.alert("Session complete! Take a short break, then choose the next block.");
+        }
+      }, 1000);
+    });
+
+    $("pauseTimer").addEventListener("click", stopTimer);
+    $("restartTimer").addEventListener("click", () => {
+      stopTimer();
+      secondsLeft = routine[currentBlock].minutes * 60;
+      renderTimer();
+    });
+
+    renderWeeks();
+    renderDays();
+    renderSubjects();
+    renderMistakes();
+    renderMocks();
+    renderTimer();
+    updateStats();
+  </script>
+</body>
+</html>
